@@ -6,6 +6,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class MazeParser {
+
+    companion object {
+        const val WALL_CHAR = '#'
+        const val EMPTY_CHAR = ' '
+        const val ENTRANCE_CHAR = 'E'
+    }
     fun parseMaze(mazeAsString: String): Maze {
 
         // region some pre-checks
@@ -34,13 +40,13 @@ class MazeParser {
         for ((i, row) in rows.withIndex())
             for ((j, col) in row.withIndex())
                 when (col) {
-                    'E' -> {
+                    ENTRANCE_CHAR -> {
                         if (entrance != null)
                             throw IllegalArgumentException("second entrance detected index: $i,$j")
                         else
                             entrance = Tile(i, j)
                     }
-                    'W' -> walls.add(Tile(i, j))
+                    WALL_CHAR -> walls.add(Tile(i, j))
                 }
 
         if (entrance == null)
@@ -49,14 +55,14 @@ class MazeParser {
         return Maze(rowSize, colSize, entrance, walls)
     }
 
-    fun serializeMaze(maze: Maze, emptyToken: Char = ' '): String {
+    fun serializeMaze(maze: Maze, emptyToken: Char = EMPTY_CHAR): String {
         val stringBuilder = StringBuilder()
         for (i in 0 until maze.gridHeight) {
             for (j in 0 until maze.gridWidth) {
                 stringBuilder.append(
                     when {
-                        maze.entrance == Tile(i, j) -> 'E'
-                        maze.walls.contains(Tile(i, j)) -> 'W'
+                        maze.entrance == Tile(i, j) -> ENTRANCE_CHAR
+                        maze.walls.contains(Tile(i, j)) -> WALL_CHAR
                         else -> emptyToken
                     }
                 )

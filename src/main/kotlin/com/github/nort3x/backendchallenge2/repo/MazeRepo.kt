@@ -10,4 +10,7 @@ import java.util.stream.Stream
 interface MazeRepo : JpaRepository<Maze, Long> {
     @Query("select maze from Maze maze where maze.owner.username = :username")
     fun allMazesOfUserByUsername(username: String): Stream<Maze>
+
+    @Query("select maze from Maze maze where maze.solved = false")
+    fun streamOfUnsolvedMazes(): Stream<Maze>
 }

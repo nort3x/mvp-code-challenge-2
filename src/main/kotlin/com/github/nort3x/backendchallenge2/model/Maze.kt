@@ -24,6 +24,9 @@ class Maze(
     @JsonIgnore
     var owner: MazeUser? = null
 ) {
+    @JsonIgnore
+    var solved: Boolean = false
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var mazeId: Long? = null
@@ -33,6 +36,7 @@ class Maze(
         AttributeOverride(name = "rowCoord", column = Column(name = "exit_row_coord")),
         AttributeOverride(name = "colCoord", column = Column(name = "exit_col_coord"))
     )
+    @JsonIgnore
     var exit: Tile? = null
 
     val gridSize: String = "${gridWidth}x${gridHeight}"
@@ -46,7 +50,6 @@ class Maze(
     )
 
     @PrePersist
-    @PreUpdate
     private fun validateElements() {
 
         if (entrance in walls)
@@ -76,7 +79,7 @@ class Maze(
                 exit = Tile(i, 0)
             }
         }
-        for (j in 1 until gridWidth-1) {
+        for (j in 1 until gridWidth - 1) {
             if (Tile(gridHeight - 1, j) !in walls && Tile(gridHeight - 1, j) != entrance) {
                 if (exit != null)
                     throw IllegalArgumentException("found second exit point at : ${gridHeight - 1},$j")
@@ -113,6 +116,11 @@ class Maze(
             throw IllegalArgumentException("entrance point can't be located at edges")
     }
 
+    @OneToMany(mappedBy = "maze", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+    @JsonIgnore
+    var mazeSolutions: MutableSet<MazeSolution> = mutableSetOf()
+
 }
 
 data class MazeRegisterDto(val gridSize: String, val entrance: Tile, val walls: Set<Tile> = setOf())
+data class MazePath(val path: List<Tile>)

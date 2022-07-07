@@ -1,11 +1,12 @@
 package com.github.nort3x.backendchallenge2.services
 
-import com.github.nort3x.backendchallenge2.model.Maze
-import com.github.nort3x.backendchallenge2.model.MazeRegisterDto
-import com.github.nort3x.backendchallenge2.model.MazeUser
+import com.github.nort3x.backendchallenge2.model.*
 import com.github.nort3x.backendchallenge2.repo.MazeRepo
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.stream.Stream
+import kotlin.math.abs
 
 @Service
 class MazeService(val mazeRepo: MazeRepo, val mazeParser: MazeParser) {
@@ -26,6 +27,34 @@ class MazeService(val mazeRepo: MazeRepo, val mazeParser: MazeParser) {
 
     fun mazesOfUser(mazeUser: MazeUser): Stream<Maze> {
         return mazeRepo.allMazesOfUserByUsername(mazeUser.username)
+    }
+
+    fun getMazeById(mazeId: Long): Maze {
+        return mazeRepo.findByIdOrNull(mazeId) ?: throw IllegalArgumentException("maze not found")
+    }
+
+    @Transactional
+    fun connectPath(solution: MazeSolution): MazePath {
+        var entrance = solution.maze.entrance
+        val linkedPath = mutableListOf<Tile>()
+
+        fun Tile.isInNeighborOf(tile: Tile): Boolean =
+            abs(this.colCoord - tile.colCoord) <= 1 && abs(this.rowCoord - tile.rowCoord) <= 1
+
+        val solutionCopy = solution.clone()
+
+        while (solutionCopy.path.isNotEmpty()){
+            linkedPath.add(entrance)
+            solutionCopy.path.remove(entrance)
+            try {
+                entrance = solutionCopy.path.first { entrance.isInNeighborOf(it) }
+
+            }catch (_: java.util.NoSuchElementException){
+                throw InternalError("malformed solution detected for mazeId: ${solution.maze.mazeId}")
+            }
+        }
+
+        return MazePath(linkedPath)
     }
 
 
