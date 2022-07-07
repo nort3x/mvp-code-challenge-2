@@ -1,3 +1,5 @@
+[![Publish Docker image](https://github.com/nort3x/mvp-code-challenge-2/actions/workflows/docker-push.yml/badge.svg)](https://github.com/nort3x/mvp-code-challenge-2/actions/workflows/docker-push.yml)
+
 ## MVP code challenge #2 - The Rat Maze
 
 #### additional notes:
@@ -34,3 +36,6 @@ what is a valid maze?:
 |   space   | ` `  |   space   |
 
 
+### how to launch?
+
+pull the docker from docker hub `docker run -p 8080:8080 nort3x/mvp-cc-2`
